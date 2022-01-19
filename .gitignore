@@ -1,12 +1,9 @@
-# Active State
-.komodotools/
-*.komodoproject
-
 #Inhouse
 VersionArchive/
 Archive/
 TestData/*_env/
 .git/
+.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
