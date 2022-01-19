@@ -3,7 +3,7 @@
 # Be careful to manually add modules as it might be over written.
 # Check the [Project Import][ReWrite] settings in:
 # packageit\pimp.ini and
-# D:\Dropbox\Projects\sqldbwrpr\.packageit\packageit.ini
+# D:\Dropbox\Projects\SqlDbWrpr\.packageit\packageit.ini
 #===================================================================
 pip
 wheel
