@@ -12,4 +12,7 @@ semverit
 termcolor
 toml
 mysql-connector
-mysql-connector
+pyodbc
+csvwrpr
+displayfx
+fixdate
