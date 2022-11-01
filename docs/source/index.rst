@@ -4,7 +4,7 @@
 .. ======================================================
 
 =========
-SqlDbWrpr
+sqldbwrpr
 =========
 
 Project Short Description (default ini)

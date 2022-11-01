@@ -41,6 +41,7 @@ class SQLDbWrpr:
         p_bar_len=50,
         p_msg_width=50,
         p_verbose=False,
+        p_db_port='3306',
     ):
         '''Create database with supplied structure and return a connector to the database
 
@@ -89,6 +90,7 @@ class SQLDbWrpr:
         self.table_load_order = []
         self.user_name = p_user_name
         self.get_db_field_types()
+        self.db_port = p_db_port
 
     def close(self):
         '''Close the connention'''
@@ -1313,6 +1315,7 @@ class MySQL(SQLDbWrpr):
         p_verbose=False,
         p_admin_username=False,
         p_admin_user_password=False,
+        p_db_port='3306',
     ):
         '''Description'''
         super().__init__(
@@ -1327,6 +1330,7 @@ class MySQL(SQLDbWrpr):
             p_bar_len=p_bar_len,
             p_msg_width=p_msg_width,
             p_verbose=p_verbose,
+            p_db_port=p_db_port,
         )
         try:
             self.conn = mysql.connector.connect(
@@ -1335,6 +1339,7 @@ class MySQL(SQLDbWrpr):
                 password=self._password,
                 database=None,
                 auth_plugin='mysql_native_password',
+                port=self.db_port,
             )
             self.cur = self.conn.cursor()
         except mysql.connector.Error as err:
@@ -1480,6 +1485,7 @@ def do_tests(p_app_path='', p_cls=True):
             p_user_rigthts,
             p_db_structure,
             p_admin_user,
+            p_db_port,
         ):
             success = True
             print('\nTest initialization, creation and population of database...')
@@ -1497,6 +1503,7 @@ def do_tests(p_app_path='', p_cls=True):
                         p_batch_size=1,
                         p_admin_username=p_admin_user[0],
                         p_admin_user_password=p_admin_user[1],
+                        p_db_port=p_db_port,
                     )
                 # elif db_vendor == 'MSSQL':
                 #   msSQLDb = MSSQL( _PROJ_NAME, p_host_name = db_host_PROJ_NAME, p_user_name = db_uid, p_password = db_pwd, p_recreate_db = True, p_db_name = DbName,
@@ -1853,7 +1860,7 @@ def do_tests(p_app_path='', p_cls=True):
             print('\nTest import of incomplete records...')
             tablest_o_load = {
                 'Country': [country_path, t_country_db01],
-                'Member': [incomplete_records_path, t_ember_db04],
+                'Member': [incomplete_records_path, t_member_db04],
             }
 
             my_sql_db = MySQL(
@@ -1928,6 +1935,7 @@ def do_tests(p_app_path='', p_cls=True):
             db_name = 'SQLDbWrpr'
             db_user = ['rtinstall', 'Rt1nst@ll']
             db_user_rights = [db_user[0], db_host_PROJ_NAME, '*', '*', 'ALL']
+            db_port = '3306'
             new_users = [
                 ['Testing01', '1re$UtseT', 'localhost'],
                 ['Testing02', '2re$UtseT', 'localhost'],
@@ -2924,7 +2932,7 @@ def do_tests(p_app_path='', p_cls=True):
                 datetime.date(year=1980, month=1, day=1),
             ),
         ]
-        t_ember_db04 = [
+        t_member_db04 = [
             (
                 'Carlsen',
                 'Magnus',
@@ -3009,6 +3017,7 @@ def do_tests(p_app_path='', p_cls=True):
                 db_user_rights,
                 db_structure,
                 admin_user,
+                db_port,
             )
             and success
         )

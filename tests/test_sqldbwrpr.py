@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from beetools.beearchiver import Archiver
-import sqldbwrpr
+from sqldbwrpr import sqldbwrpr
 
 
 _PROJ_DESC = __doc__.split('\n')[0]
@@ -20,7 +20,7 @@ class TestSqlDbWrpr:
     def test__init__(self, env_setup_self_destruct):
         """Assert class __init__"""
         env_setup = env_setup_self_destruct
-        t_sqldbwrpr = sqldbwrpr.SqlDbWrpr("SqlDbWrpr", env_setup.dir)
+        t_sqldbwrpr = sqldbwrpr.MySQL("SqlDbWrpr", env_setup.dir)
 
         assert t_sqldbwrpr.success
         pass
