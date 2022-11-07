@@ -5,9 +5,9 @@ is giving me a lot of shit with the connection and I gave up for now to
 get it working.
 '''
 
+import logging
 import os
 import datetime
-import logging
 import sys
 import mysql.connector
 from mysql.connector import Error
@@ -30,7 +30,6 @@ class SQLDbWrpr:
 
     def __init__(
         self,
-        p_parent_logger_name=None,
         p_host_name='localhost',
         p_user_name='',
         p_password='',
@@ -46,7 +45,6 @@ class SQLDbWrpr:
         '''Create database with supplied structure and return a connector to the database
 
         Parameters
-        - p_parent_logger_name - Name of parent logger
         - p_host_name = Host to connect to
         - p_user_name = User name for connection
         - p_password = paswword of user
@@ -57,10 +55,6 @@ class SQLDbWrpr:
         - p_bar_len:     Length for the progress bar
         - p_msg_width:   Width of message before progress bar
         '''
-        self.logger_name = '{}.{}'.format(p_parent_logger_name, _PROJ_NAME)
-        self.logger = logging.getLogger(self.logger_name)
-        self.logger.info('Start')
-        # self.ver = _PROJ_VERSION
         self.success = False
         self.bar_len = p_bar_len
         self.batch_size = p_batch_size
@@ -100,7 +94,7 @@ class SQLDbWrpr:
     def create_db(self):
         '''Create the database according to self.db_structure.'''
         self.cur.execute("SHOW DATABASES")
-        db_res = [x[0].lower() for x in self.cur.fetchall()]
+        db_res = [x[0].decode("utf-8") for x in self.cur.fetchall()]
         if self.db_name.lower() in db_res:
             try:
                 self.cur.execute('DROP DATABASE {}'.format(self.db_name))
@@ -995,7 +989,7 @@ class SQLDbWrpr:
                         i = j + 1
                         dfx.update(j)
                 # New needs to be tested. Writing the records 1 by 1?
-                self.logger.debug('{}'.format(p_csv_db[j + 1 : len(p_csv_db)]))
+                # self.logger.debug('{}'.format(p_csv_db[j + 1 : len(p_csv_db)]))
                 self.cur.executemany(sql_str, p_csv_db[j + 1 : len(p_csv_db)])
                 self.conn.commit()
                 if j < list_len:
@@ -1301,7 +1295,6 @@ class MySQL(SQLDbWrpr):
 
     def __init__(
         self,
-        p_parent_logger_name,
         p_host_name='localhost',
         p_user_name='',
         p_password='',
@@ -1319,7 +1312,6 @@ class MySQL(SQLDbWrpr):
     ):
         '''Description'''
         super().__init__(
-            p_parent_logger_name,
             p_host_name=p_host_name,
             p_user_name=p_user_name,
             p_password=p_password,
@@ -1343,12 +1335,15 @@ class MySQL(SQLDbWrpr):
             )
             self.cur = self.conn.cursor()
         except mysql.connector.Error as err:
+            print(
+                beetools.msg_error(
+                    f"Error {err}:'({self.user_name}'@'{self.host_name}')",
+                )
+            )
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print(
                     beetools.msg_error(
-                        "User '{}'@'{}' does not exist\nAtempt to create it...".format(
-                            self.user_name, self.host_name
-                        )
+                        f"User '{self.user_name}'@'{self.host_name}' does not exist\nAtempt to create it..."
                     )
                 )
                 if p_admin_username and p_admin_user_password and p_user_rights:
@@ -1359,6 +1354,7 @@ class MySQL(SQLDbWrpr):
                             password=p_admin_user_password,
                             database=None,
                             auth_plugin='mysql_native_password',
+                            port=self.db_port,
                         )
                     except mysql.connector.Error as err:
                         self._print_err_msg(
@@ -1410,7 +1406,6 @@ class MSSQL(SQLDbWrpr):
 
     def __init__(
         self,
-        p_parent_logger_name,
         p_host_name='localhost',
         p_user_name='',
         p_password='',
@@ -1424,7 +1419,6 @@ class MSSQL(SQLDbWrpr):
     ):
         '''Description'''
         super().__init__(
-            p_parent_logger_name,
             p_host_name=p_host_name,
             p_user_name=p_user_name,
             p_password=p_password,
@@ -1477,80 +1471,6 @@ def do_tests(p_app_path='', p_cls=True):
 
     def basic_test():
         '''Basic and mandatory scenario tests for certification of the class'''
-
-        def t_init(
-            p_db_host_PROJ_NAME,
-            p_db_user,
-            p_db_name,
-            p_user_rigthts,
-            p_db_structure,
-            p_admin_user,
-            p_db_port,
-        ):
-            success = True
-            print('\nTest initialization, creation and population of database...')
-            for db_vendor in ['MySQL']:
-                if db_vendor == 'MySQL':
-                    my_sql_db = MySQL(
-                        _PROJ_NAME,
-                        p_host_name=p_db_host_PROJ_NAME,
-                        p_user_name=p_db_user[0],
-                        p_password=p_db_user[1],
-                        p_user_rights=p_user_rigthts,
-                        p_recreate_db=True,
-                        p_db_name=p_db_name,
-                        p_db_structure=p_db_structure,
-                        p_batch_size=1,
-                        p_admin_username=p_admin_user[0],
-                        p_admin_user_password=p_admin_user[1],
-                        p_db_port=p_db_port,
-                    )
-                # elif db_vendor == 'MSSQL':
-                #   msSQLDb = MSSQL( _PROJ_NAME, p_host_name = db_host_PROJ_NAME, p_user_name = db_uid, p_password = db_pwd, p_recreate_db = True, p_db_name = DbName,
-                # p_db_structure = db_structure, p_batch_size = 1 )
-                success = my_sql_db.success and success
-                if not beetools.is_struct_the_same(
-                    my_sql_db.db_structure, t_db_structure
-                ):
-                    success = False and success
-
-                my_sql_db.import_csv('Country', country_path)
-                my_sql_db.import_csv('Member', member_path)
-                success = my_sql_db.success and success
-                if success:
-                    my_sql_db.cur.execute(
-                        'SELECT {} FROM Member'.format(
-                            ','.join(my_sql_db.db_structure['Member'])
-                        )
-                    )
-                    table_res = my_sql_db.cur.fetchall()
-                    if not beetools.is_struct_the_same(table_res, t_member_db01):
-                        success = False and success
-                my_sql_db.close()
-
-                my_sql_db = MySQL(
-                    _PROJ_NAME,
-                    p_host_name=p_db_host_PROJ_NAME,
-                    p_user_name=p_db_user[0],
-                    p_password=p_db_user[1],
-                    p_db_name=p_db_name,
-                    p_db_structure=p_db_structure,
-                    p_batch_size=1,
-                )
-                success = my_sql_db.success and success
-                if success:
-                    my_sql_db.cur.execute(
-                        'SELECT {} FROM Member'.format(
-                            ','.join(my_sql_db.db_structure['Member'])
-                        )
-                    )
-                    table_res = my_sql_db.cur.fetchall()
-                    if not beetools.is_struct_the_same(table_res, t_member_db01):
-                        success = False and success
-                my_sql_db.close()
-            return success
-
-        # end t_init
 
         def timport_csv(p_mysql_db_wrpr):
             '''Basic and mandatory scenario tests for certification of the class'''
@@ -1717,7 +1637,7 @@ def do_tests(p_app_path='', p_cls=True):
             }
             my_sql_db = MySQL(
                 _PROJ_NAME,
-                p_host_name=db_host_PROJ_NAME,
+                p_host_name=db_host_name,
                 p_user_name=db_user[0],
                 p_password=db_user[1],
                 p_recreate_db=True,
@@ -1865,7 +1785,7 @@ def do_tests(p_app_path='', p_cls=True):
 
             my_sql_db = MySQL(
                 _PROJ_NAME,
-                p_host_name=db_host_PROJ_NAME,
+                p_host_name=db_host_name,
                 p_user_name=db_user[0],
                 p_password=db_user[1],
                 p_recreate_db=True,
@@ -1894,7 +1814,7 @@ def do_tests(p_app_path='', p_cls=True):
         # end t_incomplete_records
 
         def t_user_creation(
-            p_db_host_PROJ_NAME,
+            p_db_host_name,
             p_db_user,
             p_db_name,
             p_user_rights,
@@ -1909,7 +1829,7 @@ def do_tests(p_app_path='', p_cls=True):
                 if db_vendor == 'MySQL':
                     my_sql_db = MySQL(
                         _PROJ_NAME,
-                        p_host_name=p_db_host_PROJ_NAME,
+                        p_host_name=p_db_host_name,
                         p_user_name=p_db_user[0],
                         p_password=p_db_user[1],
                         p_user_rights=p_user_rights,
@@ -1926,16 +1846,16 @@ def do_tests(p_app_path='', p_cls=True):
         success = True
         system_PROJ_NAME = platform.node()
         if system_PROJ_NAME in ['ip-172-31-18-250']:
-            db_host_PROJ_NAME = 'ccstldb.c9dax5ifrbth.us-east-1.rds.amazonaws.com'
+            db_host_name = 'ccstldb.c9dax5ifrbth.us-east-1.rds.amazonaws.com'
             db_name = 'urs_v2_dev2'
             db_user = ['urs_devuser', '31u!Rg1UEmv9Iw$x']
         else:
             admin_user = ['root', 'En0l@Gay']
-            db_host_PROJ_NAME = 'localhost'
+            db_host_name = 'localhost'
             db_name = 'SQLDbWrpr'
             db_user = ['rtinstall', 'Rt1nst@ll']
-            db_user_rights = [db_user[0], db_host_PROJ_NAME, '*', '*', 'ALL']
-            db_port = '3306'
+            db_user_rights = [db_user[0], db_host_name, '*', '*', 'ALL']
+            # db_port = '3306'
             new_users = [
                 ['Testing01', '1re$UtseT', 'localhost'],
                 ['Testing02', '2re$UtseT', 'localhost'],
@@ -3009,21 +2929,21 @@ def do_tests(p_app_path='', p_cls=True):
         ]
         # del_users = [[x[0], x[2]] for x in new_users]
 
-        success = (
-            t_init(
-                db_host_PROJ_NAME,
-                db_user,
-                db_name,
-                db_user_rights,
-                db_structure,
-                admin_user,
-                db_port,
-            )
-            and success
-        )
+        # success = (
+        #     t_init(
+        #         db_host_name,
+        #         db_user,
+        #         db_name,
+        #         db_user_rights,
+        #         db_structure,
+        #         admin_user,
+        #         db_port,
+        #     )
+        #     and success
+        # )
         success = (
             t_user_creation(
-                db_host_PROJ_NAME,
+                db_host_name,
                 db_user,
                 db_name,
                 db_user_rights,
@@ -3036,7 +2956,7 @@ def do_tests(p_app_path='', p_cls=True):
         )
         my_sql_db = MySQL(
             _PROJ_NAME,
-            p_host_name=db_host_PROJ_NAME,
+            p_host_name=db_host_name,
             p_user_name=db_user[0],
             p_password=db_user[1],
             p_recreate_db=True,
@@ -3054,7 +2974,7 @@ def do_tests(p_app_path='', p_cls=True):
         my_sql_db.close()
         my_sql_db = MySQL(
             _PROJ_NAME,
-            p_host_name=db_host_PROJ_NAME,
+            p_host_name=db_host_name,
             p_user_name=db_user[0],
             p_password=db_user[1],
             p_recreate_db=True,

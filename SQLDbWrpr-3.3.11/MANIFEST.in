@@ -1,5 +1,0 @@
-include README.rst
-include LICENSE
-include requirements.txt
-graft sqldbwrpr
-recursive-exclude * *.py[co]
