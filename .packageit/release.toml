@@ -1,3 +1,8 @@
+[4.0.1]
+Title = "Version 4.0.0"
+Description = [ "The module is not complied correctly.  Remove MANIFEST.IN."]
+GitHubIssues = [ 1,]
+
 [4.0.0]
 Title = "Version 4.0.0"
 Description = [ "Remove the mandatory loggin option completely.", "Display all connection errors.", "Start removing examples and add PyTests"]
