@@ -5,9 +5,9 @@ is giving me a lot of shit with the connection and I gave up for now to
 get it working.
 '''
 
-import logging
 import os
 import datetime
+import logging
 import sys
 import mysql.connector
 from mysql.connector import Error
@@ -55,6 +55,9 @@ class SQLDbWrpr:
         - p_bar_len:     Length for the progress bar
         - p_msg_width:   Width of message before progress bar
         '''
+        self.logger_name = '{}'.format(_PROJ_NAME)
+        self.logger = logging.getLogger(self.logger_name)
+        self.logger.info('Start')
         self.success = False
         self.bar_len = p_bar_len
         self.batch_size = p_batch_size

@@ -1,5 +1,10 @@
+[4.0.2]
+Title = "Version 4.0.2"
+Description = [ "Add back the logger.  Too much effort to remove it compeltely."]
+GitHubIssues = [ 1,]
+
 [4.0.1]
-Title = "Version 4.0.0"
+Title = "Version 4.0.1"
 Description = [ "The module is not complied correctly.  Remove MANIFEST.IN."]
 GitHubIssues = [ 1,]
 
