@@ -1,3 +1,8 @@
+[4.0.6]
+Title = "Version 4.0.5"
+Description = [ "Source code still not included.  Attempt to fix #5."]
+GitHubIssues = [ 1,]
+
 [4.0.5]
 Title = "Version 4.0.5"
 Description = [ "Source code still not included.  Attempt to fix #4."]
