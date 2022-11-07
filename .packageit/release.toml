@@ -1,3 +1,8 @@
+[4.0.3]
+Title = "Version 4.0.3"
+Description = [ "Source code not included.  Attempt to fix."]
+GitHubIssues = [ 1,]
+
 [4.0.2]
 Title = "Version 4.0.2"
 Description = [ "Add back the logger.  Too much effort to remove it compeltely."]
