@@ -91,9 +91,6 @@ class SQLDbWrpr:
         self.user_name = p_user_name
         self.get_db_field_types()
         self.db_port = p_db_port
-        self.ssl_ca = p_ssl_ca
-        self.ssl_key = p_ssl_key
-        self.ssl_cert = p_ssl_cert
 
     def close(self):
         '''Close the connention'''
@@ -1339,7 +1336,6 @@ class MySQL(SQLDbWrpr):
             # p_ssl_ca=p_ssl_ca,
             # p_ssl_key=p_ssl_key,
             # p_ssl_cert=p_ssl_cert,
-            **kwargs,
         )
         try:
             self.conn = mysql.connector.connect(
