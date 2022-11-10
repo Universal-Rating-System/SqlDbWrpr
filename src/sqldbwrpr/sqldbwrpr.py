@@ -41,6 +41,9 @@ class SQLDbWrpr:
         p_msg_width=50,
         p_verbose=False,
         p_db_port='3306',
+        p_ssl_ca=None,
+        p_ssl_key=None,
+        p_ssl_cert=None,
     ):
         '''Create database with supplied structure and return a connector to the database
 
@@ -88,6 +91,9 @@ class SQLDbWrpr:
         self.user_name = p_user_name
         self.get_db_field_types()
         self.db_port = p_db_port
+        self.ssl_ca = p_ssl_ca
+        self.ssl_key = p_ssl_key
+        self.ssl_cert = p_ssl_cert
 
     def close(self):
         '''Close the connention'''
@@ -1312,6 +1318,10 @@ class MySQL(SQLDbWrpr):
         p_admin_username=False,
         p_admin_user_password=False,
         p_db_port='3306',
+        # p_ssl_ca=None,
+        # p_ssl_key=None,
+        # p_ssl_cert=None
+        *kwargs,
     ):
         '''Description'''
         super().__init__(
@@ -1326,6 +1336,10 @@ class MySQL(SQLDbWrpr):
             p_msg_width=p_msg_width,
             p_verbose=p_verbose,
             p_db_port=p_db_port,
+            # p_ssl_ca=p_ssl_ca,
+            # p_ssl_key=p_ssl_key,
+            # p_ssl_cert=p_ssl_cert
+            *kwargs,
         )
         try:
             self.conn = mysql.connector.connect(
@@ -1335,6 +1349,10 @@ class MySQL(SQLDbWrpr):
                 database=None,
                 auth_plugin='mysql_native_password',
                 port=self.db_port,
+                # ssl_ca=self.ssl_ca,
+                # ssl_key=self.ssl_key,
+                # ssl_cert=self.ssl_cert
+                *kwargs,
             )
             self.cur = self.conn.cursor()
         except mysql.connector.Error as err:
