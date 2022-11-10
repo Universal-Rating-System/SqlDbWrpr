@@ -1,3 +1,8 @@
+[4.1.1]
+Title = "Version 4.1.1"
+Description = [ "Fix kwargs parameter."]
+GitHubIssues = [ 1,]
+
 [4.1.0]
 Title = "Version 4.1.0"
 Description = [ "Add ssl parameters."]

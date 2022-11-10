@@ -1321,7 +1321,7 @@ class MySQL(SQLDbWrpr):
         # p_ssl_ca=None,
         # p_ssl_key=None,
         # p_ssl_cert=None
-        *kwargs,
+        **kwargs,
     ):
         '''Description'''
         super().__init__(
@@ -1338,8 +1338,8 @@ class MySQL(SQLDbWrpr):
             p_db_port=p_db_port,
             # p_ssl_ca=p_ssl_ca,
             # p_ssl_key=p_ssl_key,
-            # p_ssl_cert=p_ssl_cert
-            *kwargs,
+            # p_ssl_cert=p_ssl_cert,
+            **kwargs,
         )
         try:
             self.conn = mysql.connector.connect(
@@ -1352,7 +1352,7 @@ class MySQL(SQLDbWrpr):
                 # ssl_ca=self.ssl_ca,
                 # ssl_key=self.ssl_key,
                 # ssl_cert=self.ssl_cert
-                *kwargs,
+                **kwargs,
             )
             self.cur = self.conn.cursor()
         except mysql.connector.Error as err:
