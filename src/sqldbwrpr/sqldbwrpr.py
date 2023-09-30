@@ -101,7 +101,8 @@ class SQLDbWrpr:
         '''Create the database according to self.db_structure.'''
         self.cur.execute("SHOW DATABASES")
         db_res = [x[0].decode("utf-8") for x in self.cur.fetchall()]
-        if self.db_name.lower() in db_res:
+        # if self.db_name.lower() in db_res:
+        if self.db_name in db_res:
             try:
                 self.cur.execute('DROP DATABASE {}'.format(self.db_name))
                 self.conn.commit()
@@ -601,7 +602,7 @@ class SQLDbWrpr:
                                  the number of records per file.  0 wil create
                                  only one volume.
             '''
-            file_PROJ_NAME_list = []
+            file_name_list = []
             header = p_delimeter.join(self.db_structure[p_table_name])
             prim_key_sql_str = 'SELECT '
             all_sql_str = (
@@ -649,7 +650,7 @@ class SQLDbWrpr:
                             + '{:0>2}'.format(vol_cntr)
                             + p_csv_path[-4:]
                         )
-                    file_PROJ_NAME_list.append(os.path.split(csv_vol_path))
+                    file_name_list.append(os.path.split(csv_vol_path))
                     csv_file = open(csv_vol_path, 'w+')
                     csv_file.write(header + '\n')
                 self.cur.execute(all_sql_str, pkeys_rec)
@@ -672,7 +673,7 @@ class SQLDbWrpr:
                     rec_cntr += 1
                 pfx.update(i)
             csv_file.close()
-            return file_PROJ_NAME_list
+            return file_name_list
 
         # end multi_volume_export
 
@@ -683,8 +684,8 @@ class SQLDbWrpr:
             - p_csv_path          - Path name of the file to be exported
             '''
             header = ''
-            file_PROJ_NAME_list = []
-            file_PROJ_NAME_list.append(os.path.split(p_csv_path))
+            file_name_list = []
+            file_name_list.append(os.path.split(p_csv_path))
             if not p_sql_query:
                 header = p_delimeter.join(self.db_structure[p_table_name])
                 sql_str = (
@@ -725,7 +726,7 @@ class SQLDbWrpr:
                 csv_file.write(csv_row[:-1] + '\n')
                 dfx.update(i)
             csv_file.close()
-            return file_PROJ_NAME_list
+            return file_name_list
 
         # end single_volume_export
 
@@ -1624,7 +1625,7 @@ def do_tests(p_app_path='', p_cls=True):
             # multi_vol_csv_path = os.path.join(test_data_folder, 'MultiVolCsv1.csv')
             if os.path.isfile(member_export_path):
                 os.remove(member_export_path)
-            file_PROJ_NAME_list = p_mysql_db_wrpr.export_to_csv(
+            file_name_list = p_mysql_db_wrpr.export_to_csv(
                 member_export_path, 'Member', p__vol_size=1
             )
             p_mysql_db_wrpr.cur.execute('TRUNCATE TABLE Member')
@@ -1636,7 +1637,7 @@ def do_tests(p_app_path='', p_cls=True):
             t_multi_vol_test01 = p_mysql_db_wrpr.cur.fetchall()
             if (
                 not beetools.is_struct_the_same(t_multi_vol_test01, t_member_db02)
-                and not file_PROJ_NAME_list
+                and not file_name_list
             ):
                 success = False
             return success
