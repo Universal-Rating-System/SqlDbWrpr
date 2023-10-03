@@ -1,11 +1,19 @@
 version: '3'
 
 services:
-  sqldbwrpr_test:
-    image: mysql:8.0.21
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mysql:8.0.34
     command: mysqld --default-authentication-plugin=mysql_native_password
     environment:
-      MYSQL_ROOT_PASSWORD: NotSecurePassword
-      MYSQL_DATABASE: sqldbwrpr
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PWD}
+      MYSQL_USER: ${MYSQL_INSTALLER_USERID}
+      MYSQL_PASSWORD: ${MYSQL_INSTALLER_PWD}
+#      MYSQL_DATABASE: ${MYSQL_DB_NAME}
     ports:
-      - "3308:3306"
+      - "${MYSQL_TCP_PORT}:3306"
+#      - "50001:3306"
+    volumes:
+      - ./tests/scripts:/docker-entrypoint-initdb.d/:ro
