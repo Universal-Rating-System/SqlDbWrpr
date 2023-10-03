@@ -22,14 +22,13 @@ classifiers = [
     'Programming Language :: Python :: 3.11',
 ]
 readme = {file = 'README.rst', content-type = 'text/x-rst'}
-requires-python = '>=3.11, <=12.0'
+requires-python = '>=3.8, <=12.0'
 dependencies = [
      'beetools',
   ]
 
 [project.optional-dependencies]
 dev = [
-    'reahl[all]>=6.1,<6.2',
     'git-it',
     'codecov',
     'docutils',
@@ -49,8 +48,8 @@ requires = [
     "setuptools-git >= 1.1",
 #    "pytest-runner",
 #    "toml",
-    "reahl-component-metadata>=6.1,<6.2'",
-    "setuptools_scm"
+#    "reahl-component-metadata>=6.1,<6.2'",
+#    "setuptools_scm"
 ]
 build-backend = "setuptools.build_meta"
 
