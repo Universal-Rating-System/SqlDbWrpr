@@ -1,5 +1,4 @@
 '''Testing sqldbwrpr__init__()'''
-
 # from pathlib import Path
 # from beetools.beearchiver import Archiver
 import fixtures

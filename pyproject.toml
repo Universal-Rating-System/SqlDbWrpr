@@ -16,13 +16,11 @@ classifiers = [
     'Topic :: Topic :: Text Processing',
     'Topic :: Utilities',
     'License :: OSI Approved :: MIT License',
-    'Programming Language :: Python :: 3.8',
-    'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
 ]
 readme = {file = 'README.rst', content-type = 'text/x-rst'}
-requires-python = '>=3.8, <=12.0'
+requires-python = '>=3.10, <=12.0'
 dependencies = [
      'beetools',
   ]

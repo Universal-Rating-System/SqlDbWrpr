@@ -1,24 +1,24 @@
-'''Wrapper for importing CSV and Text files into MySQL and Postgress.
+'''Wrapper for importing CSV and Text files into MySQL and Postgresql.
 
 Only the MySQL implementation is working.  The MSSQL ODBC implementation
 is giving me a lot of shit with the connection and I gave up for now to
 get it working.
 '''
-
-import os
 import datetime
 import logging
-import sys
-import mysql.connector
-from mysql.connector import Error
-from mysql.connector import errorcode
+import os
 import platform
+import sys
 from pathlib import Path
-import pyodbc
+
 import beetools
 import csvwrpr
 import displayfx
 import fixdate
+import mysql.connector
+import pyodbc
+from mysql.connector import Error
+from mysql.connector import errorcode
 
 _PROJ_DESC = __doc__.split('\n')[0]
 _PROJ_PATH = Path(__file__)
@@ -51,14 +51,14 @@ class SQLDbWrpr:
         - p_host_name = Host to connect to
         - p_user_name = User name for connection
         - p_password = paswword of user
-        - ReCreate = Recresate the database or connecto to existing database
+        - ReCreate = Recresate the database or connect to existing database
         - db_name =
         - table_details: Details of the tables to be created
         - batch_size:    Bulk data will be managed by batch_size to commit
         - p_bar_len:     Length for the progress bar
         - p_msg_width:   Width of message before progress bar
         '''
-        self.logger_name = '{}'.format(_PROJ_NAME)
+        self.logger_name = f'{_PROJ_NAME}'
         self.logger = logging.getLogger(self.logger_name)
         self.logger.info('Start')
         self.success = False
@@ -99,23 +99,21 @@ class SQLDbWrpr:
 
     def create_db(self):
         '''Create the database according to self.db_structure.'''
-        self.cur.execute("SHOW DATABASES")
-        db_res = [x[0].decode("utf-8") for x in self.cur.fetchall()]
+        self.cur.execute('SHOW DATABASES')
+        db_res = [x[0].decode('utf-8') for x in self.cur.fetchall()]
         # if self.db_name.lower() in db_res:
         if self.db_name in db_res:
             try:
-                self.cur.execute('DROP DATABASE {}'.format(self.db_name))
+                self.cur.execute(f'DROP DATABASE {self.db_name}')
                 self.conn.commit()
             except mysql.connector.Error as err:
                 self._print_err_msg(err, 'Could not drop the database')
                 self.close()
                 sys.exit()
         try:
-            self.cur.execute(
-                'CREATE DATABASE {} DEFAULT CHARACTER SET "utf8"'.format(self.db_name)
-            )
+            self.cur.execute(f'CREATE DATABASE {self.db_name} DEFAULT CHARACTER SET "utf8"')
             self.conn.commit()
-            self.cur.execute('USE {}'.format(self.db_name))
+            self.cur.execute(f'USE {self.db_name}')
             self.conn.commit()
         except mysql.connector.Error as err:
             self._print_err_msg(err, 'Could not create the database')
@@ -131,14 +129,10 @@ class SQLDbWrpr:
             for sql_set in p_db_sql_str_set:
                 try:
                     self.cur.execute(sql_set[1])
-                    print('Created table = {}'.format(sql_set[0]))
+                    print(f'Created table = {sql_set[0]}')
                 except mysql.connector.Error as err:
-                    print(
-                        'Failed creating table = {}: {}\nForced termination of program'.format(
-                            sql_set[0], err
-                        )
-                    )
-                    print('{}'.format(sql_set[1]))
+                    print(f'Failed creating table = {sql_set[0]}: {err}\nForced termination of program')
+                    print(f'{sql_set[1]}')
                     sys.exit()
             pass
 
@@ -157,7 +151,7 @@ class SQLDbWrpr:
                 table_set_up_str += idx_str
             for constraint_str in p_constraint_set_up_list:
                 table_set_up_str += constraint_str[2]
-            table_set_up_str = '{})'.format(table_set_up_str[:-2])
+            table_set_up_str = f'{table_set_up_str[:-2]})'
             return table_set_up_str
 
         # end generate_db_sql
@@ -172,18 +166,18 @@ class SQLDbWrpr:
                 if fkey['Present']:
                     fkey_nr_list.append(fkey['ForeignKeyNr'])
                     # fkey_PROJ_NAME = 'fk_{}_{}'.format( fkey[ 'FKeyTable' ], fkey[ 'RefTable' ])
-                    fkey_str = 'CONSTRAINT fk_{}_{} FOREIGN KEY ({}) REFERENCES {} ({}) ON DELETE {} ON UPDATE {}, '.format(
-                        fkey['FKeyTable'],
-                        fkey['RefTable'],
-                        '.'.join(fkey['FKeyFlds']),
-                        fkey['RefTable'],
-                        '.'.join(fkey['RefFields']),
-                        self.fkey_ref_act[fkey['OnDelete']],
-                        self.fkey_ref_act[fkey['OnUpdate']],
+                    fkey_str = (
+                        'CONSTRAINT fk_{}_{} FOREIGN KEY ({}) REFERENCES {} ({}) ON DELETE {} ON UPDATE {}, '.format(
+                            fkey['FKeyTable'],
+                            fkey['RefTable'],
+                            '.'.join(fkey['FKeyFlds']),
+                            fkey['RefTable'],
+                            '.'.join(fkey['RefFields']),
+                            self.fkey_ref_act[fkey['OnDelete']],
+                            self.fkey_ref_act[fkey['OnUpdate']],
+                        )
                     )
-                    constraint_list.append(
-                        [fkey['FKeyTable'], fkey['RefTable'], fkey_str]
-                    )
+                    constraint_list.append([fkey['FKeyTable'], fkey['RefTable'], fkey_str])
                     pass
             return constraint_list
 
@@ -213,41 +207,31 @@ class SQLDbWrpr:
                 idx_name_list = p_dx_name_list
                 idx_str_list = p_idx_str_list
                 for field_name in self.db_structure[p_table_name]:
-                    field_param_st_ref = self.db_structure[p_table_name][field_name][
-                        'Params'
-                    ]
+                    field_param_st_ref = self.db_structure[p_table_name][field_name]['Params']
                     if field_param_st_ref['Index']:
                         if field_param_st_ref['Index'][0] not in idx_list:
-                            idx_list[field_param_st_ref['Index'][0]] = [
-                                [field_name] + field_param_st_ref['Index'][1:]
-                            ]
+                            idx_list[field_param_st_ref['Index'][0]] = [[field_name] + field_param_st_ref['Index'][1:]]
                         else:
                             idx_list[field_param_st_ref['Index'][0]].append(
                                 [field_name] + field_param_st_ref['Index'][1:]
                             )
                 for idx_instance in idx_list:
-                    idx_instance_order = sorted(
-                        idx_list[idx_instance], key=lambda x: x[1]
-                    )
+                    idx_instance_order = sorted(idx_list[idx_instance], key=lambda x: x[1])
                     idx_name = ''
                     for field_det in idx_instance_order:
-                        idx_name += '{}_'.format(field_det[0])
+                        idx_name += f'{field_det[0]}_'
                     if field_det[3] == 'U':
-                        idx_name = 'unq_{}'.format(idx_name[:-1])
+                        idx_name = f'unq_{idx_name[:-1]}'
                     else:
-                        idx_name = 'idx_{}'.format(idx_name[:-1])
+                        idx_name = f'idx_{idx_name[:-1]}'
                     if idx_name not in idx_name_list:
                         idx_name_list.append(idx_name)
                         if field_det[3] == 'U':
-                            idx_str = '{} INDEX {} ('.format(
-                                self.idx_type[field_det[3]], idx_name
-                            )
+                            idx_str = f'{self.idx_type[field_det[3]]} INDEX {idx_name} ('
                         else:
-                            idx_str = 'INDEX {} ('.format(idx_name)
+                            idx_str = f'INDEX {idx_name} ('
                         for field_det in idx_instance_order:
-                            idx_str += '{} {}, '.format(
-                                field_det[0], self.sort_order[field_det[2]]
-                            )
+                            idx_str += f'{field_det[0]} {self.sort_order[field_det[2]]}, '
                         idx_str = idx_str[:-2] + ') VISIBLE, '
                         idx_str_list.append(idx_str)
                 return idx_str_list, idx_name_list
@@ -256,9 +240,7 @@ class SQLDbWrpr:
 
             idx_name_list = []
             idx_list = []
-            idx_list, idx_name_list = build_unique_key_idx(
-                p_table_name, idx_name_list, idx_list
-            )
+            idx_list, idx_name_list = build_unique_key_idx(p_table_name, idx_name_list, idx_list)
             return idx_list
 
         # def build_all_indexes
@@ -273,22 +255,16 @@ class SQLDbWrpr:
 
         def build_table_sql_str(p_table_name):
             '''Description'''
-            sql_str = 'CREATE TABLE {} ('.format(p_table_name)
+            sql_str = f'CREATE TABLE {p_table_name} ('
             for field_name in self.db_structure[p_table_name]:
                 field_type_st_ref = self.db_structure[p_table_name][field_name]['Type']
-                field_param_st_ref = self.db_structure[p_table_name][field_name][
-                    'Params'
-                ]
-                field_comment_st_ref = self.db_structure[p_table_name][field_name][
-                    'Comment'
-                ]
-                sql_str += '{} {}'.format(field_name, field_type_st_ref[0])
+                field_param_st_ref = self.db_structure[p_table_name][field_name]['Params']
+                field_comment_st_ref = self.db_structure[p_table_name][field_name]['Comment']
+                sql_str += f'{field_name} {field_type_st_ref[0]}'
                 if field_type_st_ref[0] == 'varchar' or field_type_st_ref[0] == 'char':
-                    sql_str += ' ({})'.format(str(field_type_st_ref[1]))
+                    sql_str += f' ({str(field_type_st_ref[1])})'
                 elif field_type_st_ref[0] == 'decimal':
-                    sql_str += '({}, {})'.format(
-                        str(field_type_st_ref[1]), str(field_type_st_ref[2])
-                    )
+                    sql_str += f'({str(field_type_st_ref[1])}, {str(field_type_st_ref[2])})'
                 if field_param_st_ref['AI'] == 'Y':
                     sql_str += ' AUTO_INCREMENT'
                 if field_param_st_ref['UN'] == 'Y' and field_param_st_ref['AI'] != 'Y':
@@ -298,15 +274,12 @@ class SQLDbWrpr:
                 if field_param_st_ref['ZF'] == 'Y':
                     sql_str += ' ZEROFILL'
                 if field_param_st_ref['DEF']:
-                    if (
-                        field_type_st_ref[0] == 'varchar'
-                        or field_type_st_ref[0] == 'char'
-                    ):
+                    if field_type_st_ref[0] == 'varchar' or field_type_st_ref[0] == 'char':
                         sql_str += ' DEFAULT "{}"'.format(field_param_st_ref['DEF'])
                     else:
                         sql_str += ' DEFAULT {}'.format(field_param_st_ref['DEF'])
                 if field_comment_st_ref:
-                    sql_str += ' COMMENT "{}"'.format(field_comment_st_ref)
+                    sql_str += f' COMMENT "{field_comment_st_ref}"'
                 sql_str += ', '
             return sql_str
 
@@ -324,9 +297,7 @@ class SQLDbWrpr:
                 'OnDelete': 'N',
                 'OnUpdate': 'N',
             }
-            fkey_source = self.db_structure[p_table_name][p_field_name]['Params'][
-                'FKey'
-            ]
+            fkey_source = self.db_structure[p_table_name][p_field_name]['Params']['FKey']
             if fkey_source:
                 table_det = self.db_structure[p_table_name]
                 fkey['ForeignKeyNr'] = fkey_source[0]
@@ -335,10 +306,7 @@ class SQLDbWrpr:
                 ref_field_pair_list = []
                 for field in table_det:
                     if table_det[field]['Params']['FKey']:
-                        if (
-                            table_det[field]['Params']['FKey'][0]
-                            == fkey['ForeignKeyNr']
-                        ):
+                        if table_det[field]['Params']['FKey'][0] == fkey['ForeignKeyNr']:
                             ref_field_pair_list.append(
                                 [
                                     field,
@@ -369,13 +337,9 @@ class SQLDbWrpr:
                         )
                     )
                     pkey['SortPairStr'].append(
-                        (
-                            '{} {}'.format(
-                                field_name,
-                                self.sort_order[
-                                    pkey_field_det['Params']['PrimaryKey'][1]
-                                ],
-                            )
+                        '{} {}'.format(
+                            field_name,
+                            self.sort_order[pkey_field_det['Params']['PrimaryKey'][1]],
                         )
                     )
                     pkey['Present'] = True
@@ -436,18 +400,12 @@ class SQLDbWrpr:
                 def remove_fkey(p_fkey):
                     '''Description'''
                     for field_name in self.db_structure[p_fkey['FKeyTable']]:
-                        if self.db_structure[p_fkey['FKeyTable']][field_name]['Params'][
-                            'FKey'
-                        ]:
+                        if self.db_structure[p_fkey['FKeyTable']][field_name]['Params']['FKey']:
                             if (
-                                self.db_structure[p_fkey['FKeyTable']][field_name][
-                                    'Params'
-                                ]['FKey'][0]
+                                self.db_structure[p_fkey['FKeyTable']][field_name]['Params']['FKey'][0]
                                 == p_fkey['ForeignKeyNr']
                             ):
-                                self.db_structure[p_fkey['FKeyTable']][field_name][
-                                    'Params'
-                                ]['FKey'] = []
+                                self.db_structure[p_fkey['FKeyTable']][field_name]['Params']['FKey'] = []
                     pass
 
                 # end remove_fkey
@@ -458,9 +416,7 @@ class SQLDbWrpr:
                     for field_name in source_table:
                         fkey = get_foreign_key(table_name, field_name)
                         if fkey['Present']:
-                            if pkey['Flds'] != fkey['FKeyFlds'] and partial_overlap(
-                                fkey, pkey
-                            ):
+                            if pkey['Flds'] != fkey['FKeyFlds'] and partial_overlap(fkey, pkey):
                                 log_str = 'The foreign key {}.{} and the primary key in {}.{} overlaps.'.format(
                                     fkey['FKeyTable'],
                                     fkey['FKeyFlds'],
@@ -519,7 +475,7 @@ class SQLDbWrpr:
 
     def create_users(self, p_admin_user, p_new_users):
         c_user_PROJ_NAME = 0
-        self.cur.execute("SELECT User, Host FROM mysql.user".format())
+        self.cur.execute('SELECT User, Host FROM mysql.user')
         curr_users = self.cur.fetchall()
         for user in p_new_users:
             if not user[c_user_PROJ_NAME] in curr_users:
@@ -540,16 +496,12 @@ class SQLDbWrpr:
         c_user_PROJ_NAME = 0
         # c_password = 1
         c_host = 2
-        self.cur.execute("SELECT User FROM mysql.user")
+        self.cur.execute('SELECT User FROM mysql.user')
         curr_users = [x[0] for x in self.cur.fetchall()]
         for user in p_del_users:
             if user[c_user_PROJ_NAME] in curr_users:
                 try:
-                    self.cur.execute(
-                        "DROP USER '{}'@'{}'".format(
-                            user[c_user_PROJ_NAME], user[c_host]
-                        )
-                    )
+                    self.cur.execute(f"DROP USER '{user[c_user_PROJ_NAME]}'@'{user[c_host]}'")
                 except mysql.connector.Error as err:
                     self._print_err_msg(err, 'Could not delete user')
                     self.close()
@@ -563,9 +515,7 @@ class SQLDbWrpr:
             try:
                 self.cur.execute(p_sql_str, row)
             except Exception:
-                self.logger.warning(
-                    '{}\n{}\nForced program termination'.format(p_sql_str, row)
-                )
+                self.logger.warning(f'{p_sql_str}\n{row}\nForced program termination')
                 sys.exit()
             else:
                 self.conn.commit()
@@ -584,12 +534,12 @@ class SQLDbWrpr:
         '''Export a table to a csv file
 
         Parameters
-        - p_csv_path          - Path name of the file to be exported
-        - p_table_name = ''   - Table name to export
+        - p_csv_path         - Path name of the file to be exported
+        - p_table_name = ''  - Table name to export
         - p_delimeter = '|'  - Field delimiter to use
-        - p_strip_chars = ''  - characters to strip from text
-        - p__vol_size = 0      - Create a multiple volume export. p__vol_size is
-                             the number of records per file.  0 wil create
+        - p_strip_chars = '' - characters to strip from text
+        - p__vol_size = 0    - Create a multiple volume export. p__vol_size is
+                             the number of records per file.  0 will create
                              only one volume.
         '''
 
@@ -597,44 +547,33 @@ class SQLDbWrpr:
             '''Create multiple volumes in path with p__vol_size records
 
             Parameters
-            - p_csv_path          - Path name of the file to be exported
-            - p__vol_size = 0      - Create a multiple volume export. p__vol_size is
-                                 the number of records per file.  0 wil create
+            - p_csv_path         - Path name of the file to be exported
+            - p__vol_size = 0    - Create a multiple volume export. p__vol_size is
+                                 the number of records per file.  0 will create
                                  only one volume.
             '''
             file_name_list = []
             header = p_delimeter.join(self.db_structure[p_table_name])
             prim_key_sql_str = 'SELECT '
-            all_sql_str = (
-                'SELECT '
-                + header.replace(p_delimeter, ',')
-                + ' FROM '
-                + p_table_name
-                + ' WHERE '
-            )
+            all_sql_str = 'SELECT ' + header.replace(p_delimeter, ',') + ' FROM ' + p_table_name + ' WHERE '
             for i, field in enumerate(self.db_structure[p_table_name]):
-                if (
-                    self.db_structure[p_table_name][field]['Params']['PrimaryKey'][0]
-                    == 'Y'
-                ):
+                if self.db_structure[p_table_name][field]['Params']['PrimaryKey'][0] == 'Y':
                     prim_key_sql_str += field + ', '
                     all_sql_str += field + ' = %s and '
             prim_key_sql_str = prim_key_sql_str[:-2] + ' FROM ' + p_table_name
             all_sql_str = all_sql_str[:-5]
-            print('Collecting {} table records'.format(p_table_name))
+            print(f'Collecting {p_table_name} table records')
             self.cur.execute(prim_key_sql_str)
             prim_key_res = self.cur.fetchall()
             vol_cntr = 1
             # curr_vol_size = p__vol_size
             list_len = len(prim_key_res)
             msg = beetools.msg_display(
-                'Export records table = {} ({})'.format(p_table_name, list_len),
+                f'Export records table = {p_table_name} ({list_len})',
                 p_len=self.msg_width,
             )
             rec_cntr = 0
-            pfx = displayfx.DisplayFx(
-                _PROJ_NAME, list_len, p_msg=msg, p_bar_len=self.bar_len
-            )
+            pfx = displayfx.DisplayFx(_PROJ_NAME, list_len, p_msg=msg, p_bar_len=self.bar_len)
             csv_file = None
             for i, pkeys_rec in enumerate(prim_key_res):
                 if rec_cntr == 0:
@@ -645,11 +584,7 @@ class SQLDbWrpr:
                     if vol_cntr == 1:
                         csv_vol_path = p_csv_path
                     else:
-                        csv_vol_path = (
-                            p_csv_path[:-4]
-                            + '{:0>2}'.format(vol_cntr)
-                            + p_csv_path[-4:]
-                        )
+                        csv_vol_path = p_csv_path[:-4] + f'{vol_cntr:0>2}' + p_csv_path[-4:]
                     file_name_list.append(os.path.split(csv_vol_path))
                     csv_file = open(csv_vol_path, 'w+')
                     csv_file.write(header + '\n')
@@ -688,29 +623,22 @@ class SQLDbWrpr:
             file_name_list.append(os.path.split(p_csv_path))
             if not p_sql_query:
                 header = p_delimeter.join(self.db_structure[p_table_name])
-                sql_str = (
-                    'SELECT '
-                    + header.replace(p_delimeter, ',')
-                    + ' FROM '
-                    + p_table_name
-                )
+                sql_str = 'SELECT ' + header.replace(p_delimeter, ',') + ' FROM ' + p_table_name
             else:
                 header = p_delimeter.join(p_sql_query[0])
                 sql_str = p_sql_query[1]
             csv_file = open(p_csv_path, 'w+')
             csv_file.write(header + '\n')
-            print('Collecting {} table records'.format(p_table_name))
+            print(f'Collecting {p_table_name} table records')
             self.cur.execute(sql_str)
             table_res = self.cur.fetchall()
             # cntr = 0
             list_len = len(table_res)
             msg = beetools.msg_display(
-                'Export records table = {} ({})'.format(p_table_name, list_len),
+                f'Export records table = {p_table_name} ({list_len})',
                 p_len=self.msg_width,
             )
-            dfx = displayfx.DisplayFx(
-                _PROJ_NAME, list_len, p_msg=msg, p_bar_len=self.bar_len
-            )
+            dfx = displayfx.DisplayFx(_PROJ_NAME, list_len, p_msg=msg, p_bar_len=self.bar_len)
             for i, row in enumerate(table_res):
                 csv_row = ''
                 for j, field in enumerate(row):
@@ -734,7 +662,7 @@ class SQLDbWrpr:
         try:
             self.cur.execute('SELECT COUNT(*) FROM ' + p_table_name)
         except mysql.connector.Error as err:
-            print('Err mesg: {}'.format(err.msg))
+            print(f'Err mesg: {err.msg}')
             print(err.msg)
         else:
             count_rec_res = self.cur.fetchall()[0][0]
@@ -823,7 +751,7 @@ class SQLDbWrpr:
           - Contains the csv table in a structure and makes p_csv_file_name obsolete.
         - p_csv_corr_str_file_name = ''
           - String that contains any strings that should be replace in the csv
-            file brfore parsing
+            file before parsing
         - p_vol_type = 'Multi'
           - Multi - Read multiple volume
           - Single - Read single file
@@ -845,7 +773,7 @@ class SQLDbWrpr:
                 csv_db = p_csv_db
                 list_len = len(csv_db)
                 msg = beetools.msg_display(
-                    'Convert empty strings to None ({})'.format(list_len),
+                    f'Convert empty strings to None ({list_len})',
                     p_len=self.msg_width,
                 )
                 dfx = displayfx.DisplayFx(
@@ -867,9 +795,7 @@ class SQLDbWrpr:
                         rows_to_del.append(row_idx)
                     dfx.update(row_idx)
                 list_len = len(rows_to_del)
-                msg = beetools.msg_display(
-                    'Cleanup ({})'.format(list_len), p_len=self.msg_width
-                )
+                msg = beetools.msg_display(f'Cleanup ({list_len})', p_len=self.msg_width)
                 dfx = displayfx.DisplayFx(
                     _PROJ_NAME,
                     list_len,
@@ -885,7 +811,7 @@ class SQLDbWrpr:
             # end convert_str_to_none
 
             def find_non_char_field_idx(p_csv_db):
-                '''Find the indexs of the fealds to could potentially contain mepty strings.'''
+                '''Find the index of the fields that could potentially contain mepty strings.'''
                 non_char_fields_idx = []
                 for header_field_name in self.non_char_fields[p_table_name]:
                     for row_idx, data_field_name in enumerate(p_csv_db[0]):
@@ -897,7 +823,7 @@ class SQLDbWrpr:
             # end find_non_char_field_idx
 
             def fix_dates(p_csv_db, p_table_name, p_header):
-                '''Ensure date and datetime fileds in the database is valid.'''
+                '''Ensure date and datetime fields in the database is valid.'''
                 c_field_idx = 0
                 c_field_type = 1
                 csv_db = p_csv_db
@@ -907,10 +833,7 @@ class SQLDbWrpr:
                     if field in self.db_structure[p_table_name]:
                         if self.db_structure[p_table_name][field]['Type'][0] == 'date':
                             idx.append([i, 'date'])
-                        elif (
-                            self.db_structure[p_table_name][field]['Type'][0]
-                            == 'datetime'
-                        ):
+                        elif self.db_structure[p_table_name][field]['Type'][0] == 'datetime':
                             idx.append([i, 'datetime'])
                 if idx:
                     for i, row in enumerate(csv_db[1:]):
@@ -928,17 +851,13 @@ class SQLDbWrpr:
                                         csv_db[i + 1] = (
                                             csv_db[i + 1][: field_det[c_field_idx]]
                                             + (fixed_date,)
-                                            + csv_db[i + 1][
-                                                field_det[c_field_idx] + 1 :
-                                            ]
+                                            + csv_db[i + 1][field_det[c_field_idx] + 1 :]
                                         )
                                     if isinstance(csv_db[i + 1], list):
                                         csv_db[i + 1] = (
                                             csv_db[i + 1][: field_det[c_field_idx]]
                                             + [fixed_date]
-                                            + csv_db[i + 1][
-                                                field_det[c_field_idx] + 1 :
-                                            ]
+                                            + csv_db[i + 1][field_det[c_field_idx] + 1 :]
                                         )
                                     pass
                                     # elif field_det[ c_field_type ] == 'datetime' and isinstance( row[ field_det[ c_field_idx ]], datetime.datetime ):
@@ -963,7 +882,7 @@ class SQLDbWrpr:
                 j = 0  # In case batch size is more than all records
                 list_len = len(p_csv_db)
                 msg = beetools.msg_display(
-                    'Populate table = {} ({})'.format(p_table_name, list_len),
+                    f'Populate table = {p_table_name} ({list_len})',
                     p_len=self.msg_width,
                 )
                 dfx = displayfx.DisplayFx(
@@ -1012,9 +931,7 @@ class SQLDbWrpr:
                 header = csv_db[0]
             csv_db = fix_dates(csv_db, p_table_name, header)
             if self.non_char_fields[p_table_name]:
-                csv_db = convert_str_to_none(
-                    find_non_char_field_idx(p_csv_db), p_csv_db
-                )
+                csv_db = convert_str_to_none(find_non_char_field_idx(p_csv_db), p_csv_db)
             write_to_table(csv_db)
             pass
 
@@ -1071,13 +988,9 @@ class SQLDbWrpr:
                     import_volume(csv_db, p_header, p_verbose)
                     success = True
                 vol_cntr += 1
-                vol_csv_file_name = (
-                    p_csv_file_name[:-4]
-                    + '{:0>2}'.format(vol_cntr)
-                    + p_csv_file_name[-4:]
-                )
+                vol_csv_file_name = p_csv_file_name[:-4] + f'{vol_cntr:0>2}' + p_csv_file_name[-4:]
             if not success:
-                log_str = 'No data to import from {}'.format(vol_csv_file_name)
+                log_str = f'No data to import from {vol_csv_file_name}'
                 self.logger.warning(log_str)
             return success
 
@@ -1188,14 +1101,12 @@ class SQLDbWrpr:
             table_len = len(csv_file_data[1:])
             if isinstance(p_data, list):
                 msg = beetools.msg_display(
-                    'Split data to {} ({})'.format(table, table_len),
+                    f'Split data to {table} ({table_len})',
                     p_len=self.msg_width,
                 )
             else:
                 msg = beetools.msg_display(
-                    'Split {} to {} ({})'.format(
-                        os.path.split(p_data)[1], table, table_len
-                    ),
+                    f'Split {os.path.split(p_data)[1]} to {table} ({table_len})',
                     p_len=self.msg_width,
                 )
             c_field_nr = 0
@@ -1226,9 +1137,7 @@ class SQLDbWrpr:
                 for field_det in field_list:
                     t_str = ''
                     if field_det[c_cmd] == c_cmd_opy:  # Copy / duplicate
-                        if field_det[c_parm1] == c_no_trunc or isinstance(
-                            row[field_det[c_field_nr]], str
-                        ):
+                        if field_det[c_parm1] == c_no_trunc or isinstance(row[field_det[c_field_nr]], str):
                             t_str = row[field_det[c_field_nr]]
                         else:
                             t_str = row[field_det[c_field_nr]][0 : field_det[c_parm1]]
@@ -1237,13 +1146,9 @@ class SQLDbWrpr:
                                 t_str = field_det[c_parm3][c_parm3_def_str]
                     elif field_det[c_cmd] == c_cmd_insert:  # Insert fixed value
                         t_str = field_det[c_parm1]
-                    elif (
-                        field_det[c_cmd] == c_cmd_split
-                    ):  # Insert fixed value from split field
+                    elif field_det[c_cmd] == c_cmd_split:  # Insert fixed value from split field
                         if row[field_det[c_field_nr]].count(',') >= field_det[c_parm1]:
-                            t_str = row[field_det[c_field_nr]].split(',')[
-                                field_det[c_parm1]
-                            ]
+                            t_str = row[field_det[c_field_nr]].split(',')[field_det[c_parm1]]
                         else:
                             t_str = ''
                     elif field_det[c_cmd] == c_cmd_date:  # Insert special value
@@ -1251,17 +1156,11 @@ class SQLDbWrpr:
                             t_str = row[field_det[c_field_nr]] + '/01/01'
                         else:
                             print('my_sql_db: 143 - Unknown value -', field_list[1])
-                    elif (
-                        field_det[c_cmd] == c_cmd_look_up
-                    ):  # Replace with look up value
+                    elif field_det[c_cmd] == c_cmd_look_up:  # Replace with look up value
                         if row[field_det[c_field_nr]] in field_det[c_parm1]:
                             t_str = field_det[c_parm1][row[field_det[0]]]
-                    elif (
-                        field_det[c_cmd] == c_cmd_copy_sub
-                    ):  # Replace with substring from original field
-                        t_str = row[field_det[c_field_nr]][
-                            field_det[c_parm1][0] : field_det[c_parm1][1]
-                        ]
+                    elif field_det[c_cmd] == c_cmd_copy_sub:  # Replace with substring from original field
+                        t_str = row[field_det[c_field_nr]][field_det[c_parm1][0] : field_det[c_parm1][1]]
                     elif field_det[c_cmd] == c_cmd_auto_inc:  # Insert auto number
                         t_str = field_det[c_parm1]
                         field_det[c_parm1] += 1
@@ -1286,7 +1185,7 @@ class SQLDbWrpr:
     def _print_err_msg(p_err, p_msg=''):
         msg = p_msg
         if p_msg:
-            msg = '{}\n'.format(p_msg)
+            msg = f'{p_msg}\n'
         print(
             beetools.msg_error(
                 '{}Err No:\t\t{}\nSQL State:\t{}\nErr Msg:\t{}\nSystem terminated...'.format(
@@ -1385,13 +1284,9 @@ class MySQL(SQLDbWrpr):
                             [p_admin_username, p_admin_user_password],
                             [[p_user_name, p_password]],
                         )
-                        self.grant_rights(
-                            [p_admin_username, p_admin_user_password], [p_user_rights]
-                        )
+                        self.grant_rights([p_admin_username, p_admin_user_password], [p_user_rights])
                     else:
-                        print(
-                            beetools.msg_error('Could not connect\nSystem terminated')
-                        )
+                        print(beetools.msg_error('Could not connect\nSystem terminated'))
                         sys.exit()
                 else:
                     self._print_err_msg(
@@ -1503,9 +1398,7 @@ def do_tests(p_app_path='', p_cls=True):
             }
             for table_name in p_mysql_db_wrpr.table_load_order:
                 if table_name in tablest_o_load:
-                    p_mysql_db_wrpr.import_csv(
-                        table_name, tablest_o_load[table_name][0]
-                    )
+                    p_mysql_db_wrpr.import_csv(table_name, tablest_o_load[table_name][0])
                     success = p_mysql_db_wrpr.success and success
                     p_mysql_db_wrpr.cur.execute(
                         'SELECT {} FROM {}'.format(
@@ -1514,9 +1407,7 @@ def do_tests(p_app_path='', p_cls=True):
                         )
                     )
                     table_res = p_mysql_db_wrpr.cur.fetchall()
-                    if beetools.is_struct_the_same(
-                        table_res, tablest_o_load[table_name][1]
-                    ):
+                    if beetools.is_struct_the_same(table_res, tablest_o_load[table_name][1]):
                         success = True and success
             return success
 
@@ -1539,20 +1430,12 @@ def do_tests(p_app_path='', p_cls=True):
                     while os.path.isfile(vol_csv_file_name):
                         os.remove(vol_csv_file_name)
                         vol_cntr += 1
-                        vol_csv_file_name = (
-                            member_export_path[:-4]
-                            + '{:0>2}'.format(vol_cntr)
-                            + member_export_path[-4:]
-                        )
-                    p_mysql_db_wrpr.export_to_csv(
-                        tables_to_export[table_name][0], table_name
-                    )
+                        vol_csv_file_name = member_export_path[:-4] + f'{vol_cntr:0>2}' + member_export_path[-4:]
+                    p_mysql_db_wrpr.export_to_csv(tables_to_export[table_name][0], table_name)
                     success = p_mysql_db_wrpr.success and success
-                    p_mysql_db_wrpr.cur.execute('TRUNCATE TABLE {}'.format(table_name))
+                    p_mysql_db_wrpr.cur.execute(f'TRUNCATE TABLE {table_name}')
                     p_mysql_db_wrpr.conn.commit()
-                    p_mysql_db_wrpr.import_csv(
-                        table_name, tables_to_export[table_name][0]
-                    )
+                    p_mysql_db_wrpr.import_csv(table_name, tables_to_export[table_name][0])
                     p_mysql_db_wrpr.cur.execute(
                         'SELECT {} FROM {}'.format(
                             ','.join(my_sql_db.db_structure[table_name]),
@@ -1560,9 +1443,7 @@ def do_tests(p_app_path='', p_cls=True):
                         )
                     )
                     table_res = p_mysql_db_wrpr.cur.fetchall()
-                    if not beetools.is_struct_the_same(
-                        table_res, tables_to_export[table_name][1]
-                    ):
+                    if not beetools.is_struct_the_same(table_res, tables_to_export[table_name][1]):
                         success = False and success
             return success
 
@@ -1589,9 +1470,7 @@ def do_tests(p_app_path='', p_cls=True):
                 p_del_head=True,
                 p_struc_type=[],
             )
-            if not beetools.is_struct_the_same(
-                csv_file_join_data.csv_db, t_join_member_member_org_db
-            ):
+            if not beetools.is_struct_the_same(csv_file_join_data.csv_db, t_join_member_member_org_db):
                 success = False
             return success
 
@@ -1606,11 +1485,7 @@ def do_tests(p_app_path='', p_cls=True):
             while os.path.isfile(vol_csv_file_name):
                 os.remove(vol_csv_file_name)
                 vol_cntr += 1
-                vol_csv_file_name = (
-                    member_export_path[:-4]
-                    + '{:0>2}'.format(vol_cntr)
-                    + member_export_path[-4:]
-                )
+                vol_csv_file_name = member_export_path[:-4] + f'{vol_cntr:0>2}' + member_export_path[-4:]
             p_mysql_db_wrpr.export_to_csv(member_export_path, 'Member')
             p_mysql_db_wrpr.cur.execute('TRUNCATE TABLE Member')
             p_mysql_db_wrpr.conn.commit()
@@ -1625,20 +1500,13 @@ def do_tests(p_app_path='', p_cls=True):
             # multi_vol_csv_path = os.path.join(test_data_folder, 'MultiVolCsv1.csv')
             if os.path.isfile(member_export_path):
                 os.remove(member_export_path)
-            file_name_list = p_mysql_db_wrpr.export_to_csv(
-                member_export_path, 'Member', p__vol_size=1
-            )
+            file_name_list = p_mysql_db_wrpr.export_to_csv(member_export_path, 'Member', p__vol_size=1)
             p_mysql_db_wrpr.cur.execute('TRUNCATE TABLE Member')
             p_mysql_db_wrpr.conn.commit()
             p_mysql_db_wrpr.import_csv('Member', member_export_path, p_vol_type='Multi')
-            p_mysql_db_wrpr.cur.execute(
-                'SELECT Surname, Name, ActiveStatus FROM Member ORDER BY Surname'
-            )
+            p_mysql_db_wrpr.cur.execute('SELECT Surname, Name, ActiveStatus FROM Member ORDER BY Surname')
             t_multi_vol_test01 = p_mysql_db_wrpr.cur.fetchall()
-            if (
-                not beetools.is_struct_the_same(t_multi_vol_test01, t_member_db02)
-                and not file_name_list
-            ):
+            if not beetools.is_struct_the_same(t_multi_vol_test01, t_member_db02) and not file_name_list:
                 success = False
             return success
 
@@ -1665,9 +1533,7 @@ def do_tests(p_app_path='', p_cls=True):
             )
             for table_name in p_mysql_db_wrpr.table_load_order:
                 if table_name in tablest_o_load:
-                    p_mysql_db_wrpr.import_csv(
-                        table_name, tablest_o_load[table_name][0]
-                    )
+                    p_mysql_db_wrpr.import_csv(table_name, tablest_o_load[table_name][0])
                     success = p_mysql_db_wrpr.success and success
                     p_mysql_db_wrpr.cur.execute(
                         'SELECT {} FROM {}'.format(
@@ -1676,9 +1542,7 @@ def do_tests(p_app_path='', p_cls=True):
                         )
                     )
                     table_res = p_mysql_db_wrpr.cur.fetchall()
-                    if beetools.is_struct_the_same(
-                        table_res, tablest_o_load[table_name][1]
-                    ):
+                    if beetools.is_struct_the_same(table_res, tablest_o_load[table_name][1]):
                         success = True and success
 
             split_struct = {
@@ -1761,31 +1625,21 @@ def do_tests(p_app_path='', p_cls=True):
                 ],
                 p_verbose=True,
             )
-            my_sql_db.cur.execute(
-                'SELECT {} FROM Member'.format(
-                    ','.join(p_mysql_db_wrpr.db_structure['Member'])
-                )
-            )
+            my_sql_db.cur.execute('SELECT {} FROM Member'.format(','.join(p_mysql_db_wrpr.db_structure['Member'])))
             t_member_split_res = my_sql_db.cur.fetchall()
             if not beetools.is_struct_the_same(t_member_split_res, t_member_db03):
                 success = False
             my_sql_db.cur.execute(
-                'SELECT {} FROM Organization'.format(
-                    ','.join(p_mysql_db_wrpr.db_structure['Organization'])
-                )
+                'SELECT {} FROM Organization'.format(','.join(p_mysql_db_wrpr.db_structure['Organization']))
             )
             t_org_split_res = my_sql_db.cur.fetchall()
             if not beetools.is_struct_the_same(t_org_split_res, t_organization_db02):
                 success = False
             my_sql_db.cur.execute(
-                'SELECT {} FROM MemberOrg'.format(
-                    ','.join(p_mysql_db_wrpr.db_structure['MemberOrg'])
-                )
+                'SELECT {} FROM MemberOrg'.format(','.join(p_mysql_db_wrpr.db_structure['MemberOrg']))
             )
             t_member_org_split_res = my_sql_db.cur.fetchall()
-            if not beetools.is_struct_the_same(
-                t_member_org_split_res, t_member_org_db02
-            ):
+            if not beetools.is_struct_the_same(t_member_org_split_res, t_member_org_db02):
                 success = False
             my_sql_db.close()
             return success
@@ -1822,9 +1676,7 @@ def do_tests(p_app_path='', p_cls=True):
                         )
                     )
                     table_res = my_sql_db.cur.fetchall()
-                    if not beetools.is_struct_the_same(
-                        table_res, tablest_o_load[table_name][1]
-                    ):
+                    if not beetools.is_struct_the_same(table_res, tablest_o_load[table_name][1]):
                         success = False and success
             my_sql_db.close()
             return success
@@ -1886,16 +1738,12 @@ def do_tests(p_app_path='', p_cls=True):
         country_path = os.path.join(test_data_folder, 'Country.csv')
         # country_export_path = os.path.join(test_data_folder, 'CountryExport.csv')
         export_join_path = os.path.join(test_data_folder, 'JoinExport.csv')
-        incomplete_records_path = os.path.join(
-            test_data_folder, 'IncompleteRecords.csv'
-        )
+        incomplete_records_path = os.path.join(test_data_folder, 'IncompleteRecords.csv')
         member_export_path = os.path.join(test_data_folder, 'MemberExport.csv')
         member_org_export_path = os.path.join(test_data_folder, 'MemberOrgExport.csv')
         member_org_path = os.path.join(test_data_folder, 'MemberOrg.csv')
         member_path = os.path.join(test_data_folder, 'Member.csv')
-        organization_export_path = os.path.join(
-            test_data_folder, 'OrganizationExport.csv'
-        )
+        organization_export_path = os.path.join(test_data_folder, 'OrganizationExport.csv')
         organization_path = os.path.join(test_data_folder, 'Organization.csv')
         # rating_export_path = os.path.join(test_data_folder, 'RatingExport.csv')
         # rating_export_path = os.path.join( test_data_folder, 'RatingExport.csv' )
@@ -2815,9 +2663,7 @@ def do_tests(p_app_path='', p_cls=True):
                 'USA',
                 'EF90GH12',
                 5,
-                datetime.datetime(
-                    year=2020, month=4, day=30, hour=9, minute=20, second=10
-                ),
+                datetime.datetime(year=2020, month=4, day=30, hour=9, minute=20, second=10),
                 None,
                 0,
                 1980,
@@ -2904,9 +2750,7 @@ def do_tests(p_app_path='', p_cls=True):
                 'USA',
                 'EF90GH12',
                 5,
-                datetime.datetime(
-                    year=2020, month=4, day=30, hour=9, minute=20, second=10
-                ),
+                datetime.datetime(year=2020, month=4, day=30, hour=9, minute=20, second=10),
                 None,
                 0,
                 1980,
@@ -3022,9 +2866,7 @@ def do_tests(p_app_path='', p_cls=True):
     file_handle.setLevel(beetools.DEF_LOG_LEV_FILE)
     console_handle = logging.StreamHandler()
     console_handle.setLevel(beetools.DEF_LOG_LEV_CON)
-    file_format = logging.Formatter(
-        beetools.LOG_FILE_FORMAT, datefmt=beetools.LOG_DATE_FORMAT
-    )
+    file_format = logging.Formatter(beetools.LOG_FILE_FORMAT, datefmt=beetools.LOG_DATE_FORMAT)
     console_format = logging.Formatter(beetools.LOG_CONSOLE_FORMAT)
     file_handle.setFormatter(file_format)
     console_handle.setFormatter(console_format)
