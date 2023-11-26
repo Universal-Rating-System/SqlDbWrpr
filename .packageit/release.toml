@@ -1,4 +1,9 @@
-[4.1.1]
+[4.1.3]
+Title = "Version 4.1.3"
+Description = [ "Upgrade to mysql-connector-python 8.1.0."]
+GitHubIssues = [ 6,]
+
+[4.1.2]
 Title = "Version 4.1.2"
 Description = [ "Fix kwargs parameter #2."]
 GitHubIssues = [ 1,]
@@ -35,7 +40,7 @@ GitHubIssues = [ 1,]
 
 [4.0.2]
 Title = "Version 4.0.2"
-Description = [ "Add back the logger.  Too much effort to remove it compeltely."]
+Description = [ "Add back the logger.  Too much effort to remove it completely."]
 GitHubIssues = [ 1,]
 
 [4.0.1]
@@ -45,7 +50,7 @@ GitHubIssues = [ 1,]
 
 [4.0.0]
 Title = "Version 4.0.0"
-Description = [ "Remove the mandatory loggin option completely.", "Display all connection errors.", "Start removing examples and add PyTests"]
+Description = [ "Remove the mandatory login option completely.", "Display all connection errors.", "Start removing examples and add PyTests"]
 GitHubIssues = [ 1,]
 
 [3.3.11]
@@ -55,7 +60,7 @@ GitHubIssues = [ 1,]
 
 [3.3.10]
 Title = "Version 3.3.10"
-Description = [ "Fix host_PROJ_NAME and user_PROJ_NAME vaiable names.",]
+Description = [ "Fix host_PROJ_NAME and user_PROJ_NAME variable names.",]
 GitHubIssues = [ 1,]
 
 [3.3.9]

@@ -4,8 +4,9 @@ Define the fixture functions in this file to make them accessible across multipl
 '''
 import os
 from pathlib import Path
-import pytest
 from tempfile import mkdtemp
+
+import pytest
 from beetools import rm_tree
 
 
