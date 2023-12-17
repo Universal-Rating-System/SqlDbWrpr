@@ -7,13 +7,14 @@ jobs:
   CI:
     runs-on: ${{matrix.os}}
     env:
+      GH_REPO_ACCESS_BY_OWN_APPS: ${{ secrets.GH_REPO_ACCESS_BY_OWN_APPS }}
       MYSQL_DATABASE: ${{vars.MYSQL_DATABASE}}
+      MYSQL_ROOT_PASSWORD: ${{vars.MYSQL_ROOT_PASSWORD}}
       MYSQL_HOST:  ${{vars.MYSQL_HOST}}
-      MYSQL_INSTALLER_USERID: ${{vars.MYSQL_INSTALLER_USERID}}
-      MYSQL_INSTALLER_PWD: ${{vars.MYSQL_INSTALLER_PWD}}
-#      MYSQL_PWD: N0tS0S3curePassw0rd
+      INSTALLER_USERID: ${{vars.INSTALLER_USERID}}
+      INSTALLER_PWD: ${{vars.INSTALLER_PWD}}
+      MYSQL_PWD: ${{vars.MYSQL_PWD}}
       MYSQL_TCP_PORT: ${{vars.MYSQL_TCP_PORT}}
-      SQLALCHEMY_SILENCE_UBER_WARNING: 1
     strategy:
       fail-fast: true
       matrix:
@@ -21,13 +22,17 @@ jobs:
         python-version: ['3.10', '3.11']
     services:
       mysql:
-        image: mysql:8.0.21
+        image: mysql:8.0.25
         ports:
           - ${{vars.MYSQL_TCP_PORT}}:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-cmd="mysqladmin ping -h localhost -u root -p${{ vars.MYSQL_ROOT_PASSWORD }}" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=5
         env:
-#          MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_ROOT_PASSWORD: ${{vars.MYSQL_ROOT_PWD}}
+          MYSQL_ROOT_PASSWORD: ${{vars.MYSQL_ROOT_PASSWORD}}
           MYSQL_DATABASE: ${{vars.MYSQL_DATABASE}}
 
     steps:
@@ -41,7 +46,7 @@ jobs:
           architecture: x64
 
       - name: Verify DB exists
-        run: mysql --host ${{vars.MYSQL_HOST}} -uroot -p${{vars.MYSQL_ROOT_PWD}} -e "SHOW DATABASES"
+        run: mysql --host ${{env.MYSQL_HOST}} -uroot -p${{env.MYSQL_ROOT_PASSWORD}} -e "SHOW DATABASES"
 
       - name: Upgrade pip
         run: python -m pip install --upgrade pip
