@@ -6,6 +6,7 @@ on:
 jobs:
   CI:
     runs-on: ${{matrix.os}}
+
     env:
       GH_REPO_ACCESS_BY_OWN_APPS: ${{ secrets.GH_REPO_ACCESS_BY_OWN_APPS }}
       MYSQL_DATABASE: ${{vars.MYSQL_DATABASE}}
@@ -15,11 +16,13 @@ jobs:
       INSTALLER_PWD: ${{vars.INSTALLER_PWD}}
       MYSQL_PWD: ${{vars.MYSQL_PWD}}
       MYSQL_TCP_PORT: ${{vars.MYSQL_TCP_PORT}}
+
     strategy:
       fail-fast: true
       matrix:
         os: ['ubuntu-latest']
         python-version: ['3.10', '3.11']
+
     services:
       mysql:
         image: mysql:8.0.25
