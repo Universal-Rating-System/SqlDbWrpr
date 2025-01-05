@@ -1078,7 +1078,7 @@ class SQLDbWrpr:
             ).csv_db
         else:
             csv_file_data = ()
-            print("Incorect data structure")
+            print("Incorrect data structure")
         if p_insert_header and p_header:
             header = [tuple(p_header)]
             csv_file_data = header + csv_file_data
