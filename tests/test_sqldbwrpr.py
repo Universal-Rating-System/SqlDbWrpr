@@ -1,4 +1,4 @@
-from sqldbwrpr.sqldbwrpr import MySQL
+# from sqldbwrpr.sqldbwrpr import MySQL
 
 
 class TestCsvWrpr:

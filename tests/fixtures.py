@@ -186,7 +186,7 @@ DB_STRUCTURE = {
                 "G": "",
                 "DEF": "1",
             },
-            "Possible Values": "1=White,2=Balck",
+            "Possible Values": "1=White,2=Black",
             "Comment": "Race of member",
         },
         "RegDateTime": {
