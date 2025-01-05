@@ -130,7 +130,8 @@ class SQLDbWrpr:
             for sql_set in p_db_sql_str_set:
                 try:
                     self.cur.execute(sql_set[1])
-                    print(f'Created table = {sql_set[0]}')
+                    if self.silent:
+                        print(f'Created table = {sql_set[0]}')
                 except mysql.connector.Error as err:
                     print(f'Failed creating table = {sql_set[0]}: {err}\nForced termination of program')
                     print(f'{sql_set[1]}')
@@ -574,7 +575,7 @@ class SQLDbWrpr:
                 p_len=self.msg_width,
             )
             rec_cntr = 0
-            pfx = displayfx.DisplayFx(_PROJ_NAME, list_len, p_msg=msg, p_bar_len=self.bar_len)
+            pfx = displayfx.DisplayFx(list_len, p_msg=msg, p_bar_len=self.bar_len)
             csv_file = None
             for i, pkeys_rec in enumerate(prim_key_res):
                 if rec_cntr == 0:
@@ -639,7 +640,7 @@ class SQLDbWrpr:
                 f'Export records table = {p_table_name} ({list_len})',
                 p_len=self.msg_width,
             )
-            dfx = displayfx.DisplayFx(_PROJ_NAME, list_len, p_msg=msg, p_bar_len=self.bar_len)
+            dfx = displayfx.DisplayFx(list_len, p_msg=msg, p_bar_len=self.bar_len)
             for i, row in enumerate(table_res):
                 csv_row = ''
                 for j, field in enumerate(row):
@@ -778,7 +779,6 @@ class SQLDbWrpr:
                     p_len=self.msg_width,
                 )
                 dfx = displayfx.DisplayFx(
-                    _PROJ_NAME,
                     list_len,
                     p_msg=msg,
                     p_verbose=p_verbose,
@@ -798,7 +798,6 @@ class SQLDbWrpr:
                 list_len = len(rows_to_del)
                 msg = bm.display(f'Cleanup ({list_len})', p_len=self.msg_width)
                 dfx = displayfx.DisplayFx(
-                    _PROJ_NAME,
                     list_len,
                     p_msg=msg,
                     p_verbose=p_verbose,
@@ -807,6 +806,7 @@ class SQLDbWrpr:
                 for i, row_idx in enumerate(sorted(rows_to_del, reverse=True)):
                     del csv_db[row_idx]
                     dfx.update(i)
+                print()
                 return csv_db
 
             # end convert_str_to_none
@@ -844,7 +844,7 @@ class SQLDbWrpr:
                                     row[field_det[c_field_idx]], datetime.date
                                 ):
                                     fixed_date = fixdate.FixDate(
-                                        self.logger_name,
+                                        # self.logger_name,
                                         row[field_det[c_field_idx]],
                                         p_out_format='%Y/%m/%d',
                                     ).date_str
@@ -887,7 +887,6 @@ class SQLDbWrpr:
                     p_len=self.msg_width,
                 )
                 dfx = displayfx.DisplayFx(
-                    _PROJ_NAME,
                     list_len,
                     p_msg=msg,
                     p_verbose=p_verbose,
@@ -970,8 +969,8 @@ class SQLDbWrpr:
             success = False
             vol_csv_file_name = p_csv_file_name
             while os.path.isfile(vol_csv_file_name):
+                # x = csvwrpr.csv
                 csv_file_data = csvwrpr.CsvWrpr(
-                    _PROJ_NAME,
                     vol_csv_file_name,
                     p_key1=p_key,
                     p_header=p_header,
@@ -1126,7 +1125,6 @@ class SQLDbWrpr:
             c_parm3_rep_str = 0
             c_parm3_def_str = 1
             dfx = displayfx.DisplayFx(
-                _PROJ_NAME,
                 len(csv_file_data[1:]),
                 p_msg=msg,
                 p_verbose=False,
@@ -1239,6 +1237,7 @@ class MySQL(SQLDbWrpr):
             # p_ssl_cert=p_ssl_cert,
         )
         try:
+            # import pdb;pdb.set_trace()
             self.conn = mysql.connector.connect(
                 host=self.host_name,
                 user=self.user_name,
