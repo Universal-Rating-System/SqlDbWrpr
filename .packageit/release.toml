@@ -60,7 +60,7 @@ GitHubIssues = [ 1,]
 
 [3.3.10]
 Title = "Version 3.3.10"
-Description = [ "Fix host_PROJ_NAME and user_PROJ_NAME variable names.",]
+Description = [ "Fix host_name and user_name variable names.",]
 GitHubIssues = [ 1,]
 
 [3.3.9]

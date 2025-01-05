@@ -19,8 +19,6 @@ from beetools import msg as bm
 from mysql.connector import Error
 from mysql.connector import errorcode
 
-# import platform
-
 _PROJ_DESC = __doc__.split("\n")[0]
 _PROJ_PATH = Path(__file__)
 _PROJ_NAME = _PROJ_PATH.stem
@@ -193,10 +191,10 @@ class SQLDbWrpr:
             #     idx_name_list = []
             #     idx_str_list = []
             #     pkey = get_primary_key(p_table_name)
-            #     idx_PROJ_NAME = '{}_UNIQUE'.format('_'.join(pkey['Flds']))
-            #     idx_name_list.append(idx_PROJ_NAME)
+            #     idx_name = '{}_UNIQUE'.format('_'.join(pkey['Flds']))
+            #     idx_name_list.append(idx_name)
             #     idx_str = 'UNIQUE INDEX pk_{} ({}) VISIBLE, '.format(
-            #         idx_PROJ_NAME, ','.join(pkey['Flds'])
+            #         idx_name, ','.join(pkey['Flds'])
             #     )
             #     idx_str_list.append(idx_str)
             #     return idx_str_list, idx_name_list
@@ -476,11 +474,11 @@ class SQLDbWrpr:
         return success
 
     def create_users(self, p_admin_user, p_new_users):
-        c_user_PROJ_NAME = 0
+        c_user_name = 0
         self.cur.execute("SELECT User, Host FROM mysql.user")
         curr_users = self.cur.fetchall()
         for user in p_new_users:
-            if not user[c_user_PROJ_NAME] in curr_users:
+            if not user[c_user_name] in curr_users:
                 try:
                     self.cur.execute(
                         "CREATE USER IF NOT EXISTS '{}'@'{}' IDENTIFIED BY '{}'".format(
@@ -495,15 +493,15 @@ class SQLDbWrpr:
         self.success = True
 
     def delete_users(self, p_admin_user, p_del_users):
-        c_user_PROJ_NAME = 0
+        c_user_name = 0
         # c_password = 1
         c_host = 2
         self.cur.execute("SELECT User FROM mysql.user")
         curr_users = [x[0] for x in self.cur.fetchall()]
         for user in p_del_users:
-            if user[c_user_PROJ_NAME] in curr_users:
+            if user[c_user_name] in curr_users:
                 try:
-                    self.cur.execute(f"DROP USER '{user[c_user_PROJ_NAME]}'@'{user[c_host]}'")
+                    self.cur.execute(f"DROP USER '{user[c_user_name]}'@'{user[c_host]}'")
                 except mysql.connector.Error as err:
                     self._print_err_msg(err, "Could not delete user")
                     self.close()
@@ -690,7 +688,7 @@ class SQLDbWrpr:
                     self.non_char_fields[p_table_name].append(field)
 
     def grant_rights(self, p_admin_user, p_user_rights):
-        c_user_PROJ_NAME = 0
+        c_user_name = 0
         # c_password = 1
         c_host = 1
         c_db = 2
@@ -703,7 +701,7 @@ class SQLDbWrpr:
                     ",".join(right[c_rights:]),
                     right[c_db],
                     right[c_table],
-                    right[c_user_PROJ_NAME],
+                    right[c_user_name],
                     right[c_host],
                 )
                 self.cur.execute(sql_str)
@@ -712,7 +710,7 @@ class SQLDbWrpr:
                     ",".join(right[c_rights:]),
                     right[c_db],
                     right[c_table],
-                    right[c_user_PROJ_NAME],
+                    right[c_user_name],
                     right[c_host],
                 )
                 self.cur.execute(sql_str)
@@ -1340,20 +1338,20 @@ class MSSQL(SQLDbWrpr):
             p_verbose=p_verbose,
         )
         try:
-            self.host_PROJ_NAME = "156.38.224.15,1433"
-            self.user_PROJ_NAME = "chessaco_chessanew"
+            self.host_name = "156.38.224.15,1433"
+            self.user_name = "chessaco_chessanew"
             self._password = "@Jv&F77%"
             self.db_name = "chessaco_analytics"
             self.driver = "{ODBC Driver 17 for SQL Server}"
             # driver = pyodbc.drivers()
-            # con_str_1 = 'DRIVER={};SERVER={};DATABASE={};UID={};PWD={}'.format( self.driver, self.host_PROJ_NAME, self.db_name, self.user_PROJ_NAME, self._password )
+            # con_str_1 = 'DRIVER={};SERVER={};DATABASE={};UID={};PWD={}'.format( self.driver, self.host_name, self.db_name, self.user_name, self._password )
             con_str_2 = (
                 "DRIVER={ODBC Driver 17 for SQL Server};SERVER="
-                + self.host_PROJ_NAME
+                + self.host_name
                 + ";DATABASE="
                 + self.db_name
                 + ";UID="
-                + self.user_PROJ_NAME
+                + self.user_name
                 + ";PWD="
                 + self._password
             )

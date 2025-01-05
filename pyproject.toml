@@ -52,7 +52,8 @@ homepage = 'https://github.com/BrightEdgeeServices/SQLDbWrpr'
 repository = "https://github.com/RealTimeEvents/SQLDbWrpr.git"
 
 [tool.poetry.dependencies]
-    python = "^3.12.2"
+python = "^3.12.2"
+mysql-connector-python = "^9.1.0"
 
 [tool.poetry.group.dev.dependencies]
 mdformat-gfm = "^0.3.6"
