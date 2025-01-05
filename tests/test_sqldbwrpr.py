@@ -1,4 +1,6 @@
 from sqldbwrpr import My
+
+
 class TestCsvWrpr:
     def test_init(self):
         my_sql_db = MySQL(
