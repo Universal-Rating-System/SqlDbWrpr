@@ -54,6 +54,9 @@ repository = "https://github.com/RealTimeEvents/SQLDbWrpr.git"
 [tool.poetry.dependencies]
 python = "^3.12.2"
 mysql-connector-python = "^9.1.0"
+csvwrpr = "^1.16.0"
+fixdate = "^2.0.0"
+pyodbc = "^5.2.0"
 
 [tool.poetry.group.dev.dependencies]
 mdformat-gfm = "^0.3.6"
@@ -66,6 +69,7 @@ pytest = "^8.3.4"
 codecov = "^2.1.13"
 pytest-cov = "^6.0.0"
 rstcheck = "^6.2.4"
+pydantic-settings = "^2.7.1"
 
 [tool.poetry.urls]
 issues = "https://github.com/BrightEdgeeServices/SQLDbWrpr/issues"

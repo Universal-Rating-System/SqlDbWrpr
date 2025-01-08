@@ -4,11 +4,11 @@ Only the MySQL implementation is working.  The MSSQL ODBC implementation
 is giving me a lot of shit with the connection and I gave up for now to
 get it working.
 """
+
 import datetime
 import logging
 import os
 import sys
-from pathlib import Path
 
 import csvwrpr
 import displayfx
@@ -19,9 +19,12 @@ from beetools import msg as bm
 from mysql.connector import Error
 from mysql.connector import errorcode
 
-_PROJ_DESC = __doc__.split("\n")[0]
-_PROJ_PATH = Path(__file__)
-_PROJ_NAME = _PROJ_PATH.stem
+# from pathlib import Path
+
+
+# _PROJ_DESC = __doc__.split("\n")[0]
+# _PROJ_PATH = Path(__file__)
+# _PROJ_NAME = _PROJ_PATH.stem
 
 
 class SQLDbWrpr:
@@ -57,7 +60,7 @@ class SQLDbWrpr:
         - p_bar_len:     Length for the progress bar
         - p_msg_width:   Width of message before progress bar
         """
-        self.logger_name = f"{_PROJ_NAME}"
+        self.logger_name = __name__
         self.logger = logging.getLogger(self.logger_name)
         self.logger.info("Start")
         self.success = False
@@ -99,7 +102,7 @@ class SQLDbWrpr:
     def create_db(self):
         """Create the database according to self.db_structure."""
         self.cur.execute("SHOW DATABASES")
-        db_res = [x[0].decode("utf-8") for x in self.cur.fetchall()]
+        db_res = [str(x[0]) for x in self.cur.fetchall()]
         # if self.db_name.lower() in db_res:
         if self.db_name in db_res:
             try:

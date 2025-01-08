@@ -102,11 +102,11 @@ bit easier.  The scripts make use of the ``gitit`` module to simplify tasks.
 
 .. General
 
-.. |maintenance_n| image:: https://img.shields.io/badge/Maintenance%20Intended-?-red.svg?style=flat-square
+.. |maintenance_n| image:: https://img.shields.io/badge/Maintenance%20Intended-✖-red.svg?style=flat-square
     :target: http://unmaintained.tech/
     :alt: Maintenance - not intended
 
-.. |maintenance_y| image:: https://img.shields.io/badge/Maintenance%20Intended-?-green.svg?style=flat-square
+.. |maintenance_y| image:: https://img.shields.io/badge/Maintenance%20Intended-✔-green.svg?style=flat-square
     :target: http://unmaintained.tech/
     :alt: Maintenance - intended
 

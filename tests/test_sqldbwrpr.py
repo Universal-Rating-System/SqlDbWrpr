@@ -1,11 +1,30 @@
-# from sqldbwrpr.sqldbwrpr import MySQL
+from conftest import db_structure
+
+from sqldbwrpr.sqldbwrpr import MySQL
 
 
-class TestCsvWrpr:
-    def test_replace_with_actual_tests(self):
-        x = 1
-        y = 1
-        assert x == y
+class TestSqlDbWrpr:
+    def test_init(self, get_settings):
+        sqldb = MySQL(
+            p_host_name=get_settings.MYSQL_HOST,
+            p_user_name="root",
+            p_password=get_settings.MYSQL_ROOT_PASSWORD,
+            p_recreate_db=True,
+            p_db_name=get_settings.MYSQL_DATABASE,
+            p_db_structure=db_structure,
+            p_batch_size=10000,
+            p_bar_len=50,
+            p_msg_width=50,
+            p_verbose=False,
+            p_db_port=get_settings.MYSQL_TCP_PORT,
+            # p_ssl_ca=None,
+            # p_ssl_key=None,
+            # p_ssl_cert=None,
+        )
+        sqldb.cur.execute("SHOW DATABASES")
+        dbs = [str(x[0]) for x in sqldb.cur.fetchall()]
+        assert get_settings.MYSQL_DATABASE in dbs
+        pass
 
 
 # def do_tests(p_app_path='', p_cls=True):
