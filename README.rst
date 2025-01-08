@@ -5,7 +5,7 @@ Exploring SQLAlchemy
 +-----------+------------------------------------------------------------------------------------+
 |**General**| |maintenance_y| |semver| |license|                                                 |
 +-----------+------------------------------------------------------------------------------------+
-|**CI**     | |gha_tests| |gha_docu| |pre_commit_ci| |codestyle| |codecov|                       |
+|**CI**     | |codestyle| |codecov|                                                              |
 +-----------+------------------------------------------------------------------------------------+
 |**PyPI**   | |pypi_release| |pypi_py_versions| |pypi_status| |pypi_format| |pypi_downloads|     |
 +-----------+------------------------------------------------------------------------------------+
@@ -102,11 +102,11 @@ bit easier.  The scripts make use of the ``gitit`` module to simplify tasks.
 
 .. General
 
-.. |maintenance_n| image:: https://img.shields.io/badge/Maintenance%20Intended-?-red.svg?style=flat-square
+.. |maintenance_n| image:: https://img.shields.io/badge/Maintenance%20Intended-✖-red.svg?style=flat-square
     :target: http://unmaintained.tech/
     :alt: Maintenance - not intended
 
-.. |maintenance_y| image:: https://img.shields.io/badge/Maintenance%20Intended-?-green.svg?style=flat-square
+.. |maintenance_y| image:: https://img.shields.io/badge/Maintenance%20Intended-✔-green.svg?style=flat-square
     :target: http://unmaintained.tech/
     :alt: Maintenance - intended
 
