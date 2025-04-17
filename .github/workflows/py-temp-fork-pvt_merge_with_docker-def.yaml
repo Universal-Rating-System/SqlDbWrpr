@@ -1,4 +1,4 @@
-# py-temp-fork-pvt_merge_with_local-def.yaml
+# py-temp-fork-pvt_merge_no_docker-def.yaml
 name: Python Template Merge with Local Fork
 
 on:
@@ -10,7 +10,7 @@ jobs:
       id-token: write
       contents: write
     #    if: github.event.pull_request.merged == true
-    uses: BrightEdgeeServices/devops-automation/.github/workflows/py-wf-fork-merge_with_local-def.yaml@master
+    uses: BrightEdgeeServices/devops-automation/.github/workflows/py-wf-fork-merge_with_docker-def.yaml@master
     with:
       run_deploy: ${{ startsWith(github.ref, 'refs/tags/') == true }}
     # secrets: inherit
