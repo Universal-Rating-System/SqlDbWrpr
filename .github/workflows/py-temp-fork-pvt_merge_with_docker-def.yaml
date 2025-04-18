@@ -23,6 +23,7 @@ jobs:
       MYSQL_HOST:                ${{secrets.MYSQL_HOST }}
       MYSQL_PASSWORD:            ${{secrets.MYSQL_PASSWORD}}
       MYSQL_ROOT_PASSWORD:       ${{secrets.MYSQL_ROOT_PASSWORD}}
+      MYSQL_TCP_PORT:            ${{secrets.MYSQL_TCP_PORT}}
       MYSQL_USER:                ${{secrets.MYSQL_USER}}
       PROJECT_NAME:              ${{secrets.PROJECT_NAME }}
 #      RELEASE_EMAIL_USER:        ${{secrets.RELEASE_EMAIL_USER }}
