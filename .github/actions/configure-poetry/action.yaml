@@ -19,5 +19,5 @@ runs:
              poetry config keyring.enabled false
              poetry config http-basic.BEE __token__ ${{ inputs.GH_REPO_ACCESS_BEE_MASTER }}
              poetry config http-basic.RTE __token__ ${{ inputs.GH_REPO_ACCESS_RTE_MASTER }}
-             poetry source add --priority=explicit RTE https://github.com/RealTimeEvents/FideRatingList.git
-             poetry add git+https://github.com/RealTimeEvents/FideRatingList.git
+#             poetry source add --priority=explicit RTE https://github.com/RealTimeEvents/FideRatingList.git
+#             poetry add git+https://github.com/RealTimeEvents/FideRatingList.git
