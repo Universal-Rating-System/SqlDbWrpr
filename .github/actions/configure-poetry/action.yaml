@@ -1,0 +1,15 @@
+name:        'Configure Poetry'
+description: 'Insert the Poetry configuration statements in here for this repository.'
+
+runs:
+  using: "composite"
+  steps:
+    - name:  Configure Poetry
+      id:    configure-poetry
+      shell: bash
+      run:   |
+             poetry config keyring.enabled false
+             poetry config http-basic.BEE __token__ ${{ secrets.GH_REPO_ACCESS_BEE_MASTER }}
+             poetry config http-basic.RTE __token__ ${{ secrets.GH_REPO_ACCESS_RTE_MASTER }}
+             poetry source add --priority=explicit RTE https://github.com/RealTimeEvents/FideRatingList.git
+             poetry add git+https://github.com/RealTimeEvents/FideRatingList.git
