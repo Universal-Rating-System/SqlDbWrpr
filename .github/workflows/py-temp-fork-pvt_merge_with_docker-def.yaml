@@ -17,8 +17,9 @@ jobs:
     secrets:
       GH_REPO_ACCESS_BEE_MASTER: ${{secrets.GH_REPO_ACCESS_BEE_MASTER }}
       GH_REPO_ACCESS_RTE_MASTER: ${{secrets.GH_REPO_ACCESS_RTE_MASTER }}
-#      MYSQL_PASSWORD:            ${{secrets.MYSQL_PASSWORD}}
-#      MYSQL_ROOT_PASSWORD:       ${{secrets.MYSQL_ROOT_PASSWORD}}
-#      MYSQL_USER:                ${{secrets.MYSQL_USER}}
+      MYSQL_DATABASE:            ${{secrets.MYSQL_DATABASE }}
+      MYSQL_PASSWORD:            ${{secrets.MYSQL_PASSWORD}}
+      MYSQL_ROOT_PASSWORD:       ${{secrets.MYSQL_ROOT_PASSWORD}}
+      MYSQL_USER:                ${{secrets.MYSQL_USER}}
 #      RELEASE_EMAIL_USER:        ${{secrets.RELEASE_EMAIL_USER }}
 #      RELEASE_EMAIL_PASSWORD:    ${{secrets.RELEASE_EMAIL_PASSWORD }}
