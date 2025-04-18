@@ -1,11 +1,11 @@
 # py-temp-fork-pvt_merge_no_docker-def.yaml
-name: Python Template Merge with Local Fork
+name: Python Template Fork Merge With Docker
 
 on:
   push:
 
 jobs:
-  python-template-merge-with-local-fork:
+  python-template-fork-merge-with-docker:
     permissions:
       id-token: write
       contents: write
